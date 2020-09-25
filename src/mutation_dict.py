@@ -18,7 +18,7 @@ import pandas as pd
 mutList = []
 mutList2 = []
 mutDict = {}
-seqLength = 5
+seqLength = 15
 a = 'ACTG'
 for output in itertools.product(a, repeat=seqLength):
     mutList.append(''.join(output))
