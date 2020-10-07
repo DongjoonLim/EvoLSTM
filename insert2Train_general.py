@@ -3,36 +3,41 @@ import itertools
 import operator
 from tqdm import tqdm
 
-
-# In[2]:
-
-
-from keras.utils.vis_utils import plot_model
-import numpy as np
-from keras.models import Sequential
-from keras.layers import Activation, LSTM, TimeDistributed, Dense, RepeatVector, CuDNNLSTM, GRU, Bidirectional, Input, CuDNNGRU
-#from keras.utils import np_utils
-from keras.callbacks import TensorBoard
+from scipy import stats
 import tensorflow as tf
+import math
+import itertools
+import operator
+from tensorflow.python.keras import backend as k
+from tqdm import tqdm, tqdm_notebook, notebook
+import numpy as np
+from tensorflow.keras import layers
 import os
-from keras import backend as K
-from keras.models import Model
-from keras.layers.core import Dense, Reshape
-from keras.layers.wrappers import TimeDistributed
-from keras.layers import concatenate
-import difflib
-from keras.models import load_model
-import keras
-from keras import losses
+from scipy.stats.stats import pearsonr
 import matplotlib.pyplot as plt
 import random
 from random import choice
 import re
-import sys
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+import pickle
+
+from sklearn.preprocessing import LabelEncoder
+from bio import AlignIO
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from keras_preprocessing import sequence
+import sklearn
+import numpy as np
+import re
+import pickle
+import itertools
+import random
+import string
+from joblib import dump, load
 import pickle
 import sys
 import os
@@ -222,40 +227,40 @@ def lstm_model(latent_dim, half):
 #     latent_dim = 128  # Latent dimensionality of the encoding space.
 #     half = 64
     num_samples = 10000  # Number of samples to train on.
-    encoder_inputs = Input(shape=(None, encode_dimension))
+    encoder_inputs = layers.Input(shape=(None, encode_dimension))
     
-    encoder = Bidirectional(CuDNNLSTM(half, return_state=True))
+    encoder = layers.Bidirectional(layers.LSTM(half, return_state=True))
     encoder_outputs, forward_h, forward_c, backward_h, backward_c = encoder(encoder_inputs)
-    state_h = concatenate([forward_h, backward_h])
-    state_c = concatenate([forward_c, backward_c])
+    state_h = layers.concatenate([forward_h, backward_h])
+    state_c = layers.concatenate([forward_c, backward_c])
     
     
     # only keep the states.
     encoder_states = [state_h, state_c]
 
     # Set up the decoder
-    decoder_inputs = Input(shape=(None, 2*encode_dimension))
-    decoder_lstm = CuDNNLSTM(latent_dim, return_sequences=True, return_state=True)
+    decoder_inputs = layers.Input(shape=(None, 2*encode_dimension))
+    decoder_lstm = layers.LSTM(latent_dim, return_sequences=True, return_state=True)
     decoder_outputs, _, _ = decoder_lstm(decoder_inputs,
                                          initial_state=encoder_states)
-    decoder_dense = Dense(encode_dimension, activation='softmax')
+    decoder_dense = layers.Dense(encode_dimension, activation='softmax')
     decoder_outputs = decoder_dense(decoder_outputs)
 
     # Define the model that will turn
     # `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
-    model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+    model = tf.keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
     
     # inference
-    encoder_model = Model(encoder_inputs, encoder_states)
+    encoder_model = tf.keras.Model(encoder_inputs, encoder_states)
 
-    decoder_state_input_h = Input(shape=(latent_dim,))
-    decoder_state_input_c = Input(shape=(latent_dim,))
+    decoder_state_input_h = layers.Input(shape=(latent_dim,))
+    decoder_state_input_c = layers.Input(shape=(latent_dim,))
     decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
     decoder_outputs, state_h, state_c = decoder_lstm(
         decoder_inputs, initial_state=decoder_states_inputs)
     decoder_states = [state_h, state_c]
     decoder_outputs = decoder_dense(decoder_outputs)
-    decoder_model = Model(
+    decoder_model = tf.keras.Model(
     [decoder_inputs] + decoder_states_inputs,
     [decoder_outputs] + decoder_states)
 
@@ -272,62 +277,56 @@ def modelFit(epoch, batchSize, latent_dim, half, X_train, y_train, y_train1):
     hist1 = model1.fit([X_train, y_train1], y_train,
           batch_size=batchSize,
           epochs=epoch,
-          validation_data=([X_val,y_val1], y_val),
+          #validation_data=([X_test,y_test1], y_test),
+          validation_split=0.2,
           verbose = 1
          )
     return hist1, model1, encoder_model1, decoder_model1
 
 def grid_search(latent, half,train_size, X_train, y_train, y_train1):
-    hist1, model1, encoder_model1, decoder_model1 = modelFit(1, epoch, latent, half, X_train, y_train, y_train1)
-    hist2 ,model2, encoder_model2, decoder_model2 = modelFit(2, epoch, latent, half, X_train, y_train, y_train1)
-    hist3 ,model3, encoder_model3, decoder_model3 = modelFit(10, epoch, latent, half, X_train, y_train, y_train1)
-    hist4 ,model4, encoder_model4, decoder_model4 = modelFit(30, epoch, latent, half, X_train, y_train, y_train1)
-    #hist4 ,model4, encoder_model4, decoder_model4 = modelFit(30, epoch, latent, half, X_train, y_train, y_train1)
-    #hist5 ,model5, encoder_model5, decoder_model5 = modelFit(50, epoch, latent, half, X_train, y_train, y_train1)
-    #hist6 ,model6, encoder_model6, decoder_model6 = modelFit(80, epoch, latent, half, X_train, y_train, y_train1)
-    #hist7 ,model7, encoder_model7, decoder_model7 = modelFit(100, epoch, latent, half, X_train, y_train, y_train1)
-    #hist8 ,model8, encoder_model8, decoder_model8 = modelFit(500, epoch, latent, half)
+    hist1, model1, encoder_model1, decoder_model1 = modelFit(1, 256, latent, half, X_train, y_train, y_train1)
+    hist2 ,model2, encoder_model2, decoder_model2 = modelFit(2, 256, latent, half, X_train, y_train, y_train1)
+    hist3 ,model3, encoder_model3, decoder_model3 = modelFit(10, 256, latent, half, X_train, y_train, y_train1)
+    #hist4 ,model4, encoder_model4, decoder_model4 = modelFit(30, 1000, latent, half, X_train, y_train, y_train1)
+    #hist5 ,model5, encoder_model5, decoder_model5 = modelFit(50, 100, latent, half, X_train, y_train, y_train1)
+    #hist6 ,model6, encoder_model6, decoder_model6 = modelFit(80, 100, latent, half, X_train, y_train, y_train1)
+    #hist7 ,model7, encoder_model7, decoder_model7 = modelFit(100, 100, latent, half, X_train, y_train, y_train1)
+    #hist8 ,model8, encoder_model8, decoder_model8 = modelFit(500, 100, latent, half)
 
-    model1.save("models/insert2_{}_{}_{}_{}_{}_1.h5".format(ancName, desName,train_size,half,seq_length))
-    model2.save("models/insert2_{}_{}_{}_{}_{}_2.h5".format(ancName, desName,train_size,half,seq_length))
-    model3.save("models/insert2_{}_{}_{}_{}_{}_10.h5".format(ancName, desName,train_size,half,seq_length))
-    model4.save("models/insert2_{}_{}_{}_{}_{}_30.h5".format(ancName, desName,train_size,half,seq_length))
+    model1.save("models/insert2_{}_{}_{}_{}_1.h5".format(ancName, desName,ancName, desName))
+    model2.save("models/insert2_{}_{}_{}_{}_2.h5".format(ancName, desName,ancName, desName))
+    model3.save("models/insert2_{}_{}_{}_{}_10.h5".format(ancName, desName,ancName, desName))
     #model4.save("models/insert2_{}_{}_30_double.h5".format(train_size,half))
     #model5.save("models/_gap_hg38_{}_{}_50_double.h5".format(train_size,half))
     #model6.save("models/_gap_hg38_{}_{}_80_double.h5".format(train_size,half))
     #model7.save("models/_gap_hg38_{}_{}_100_double.h5".format(train_size,half))
     #model8.save("_gap_hg38_{}_{}_500.h5".format(train_size,half))
     
-    encoder_model1.save("models/E_insert2_{}_{}_{}_{}_{}_1.h5".format(ancName, desName,train_size,half,seq_length))
-    encoder_model2.save("models/E_insert2_{}_{}_{}_{}_{}_2.h5".format(ancName, desName,train_size,half,seq_length))
-    encoder_model3.save("models/E_insert2_{}_{}_{}_{}_{}_10.h5".format(ancName, desName,train_size,half,seq_length))
-    encoder_model4.save("models/E_insert2_{}_{}_{}_{}_{}_30.h5".format(ancName, desName,train_size,half,seq_length))
+    encoder_model1.save("models/E_insert2_{}_{}_{}_{}_1.h5".format(ancName, desName,ancName, desName))
+    encoder_model2.save("models/E_insert2_{}_{}_{}_{}_2.h5".format(ancName, desName,ancName, desName))
+    encoder_model3.save("models/E_insert2_{}_{}_{}_{}_10.h5".format(ancName, desName,ancName, desName))
     #encoder_model4.save("models/E_insert2_{}_{}_30_double.h5".format(train_size,half))
     #encoder_model5.save("models/E_gap_hg38_{}_{}_50_double.h5".format(train_size,half))
     #encoder_model6.save("models/E_gap_hg38_{}_{}_80_double.h5".format(train_size,half))
     #encoder_model7.save("models/E_gap_hg38_{}_{}_100_double.h5".format(train_size,half))
     #encoder_model8.save("E_gap_hg38_{}_{}_500.h5".format(train_size,half))
     
-    decoder_model1.save("models/D_insert2_{}_{}_{}_{}_{}_1.h5".format(ancName, desName,train_size,half,seq_length))
-    decoder_model2.save("models/D_insert2_{}_{}_{}_{}_{}_2.h5".format(ancName, desName,train_size,half,seq_length))
-    decoder_model3.save("models/D_insert2_{}_{}_{}_{}_{}_10.h5".format(ancName, desName,train_size,half,seq_length))
-    decoder_model4.save("models/D_insert2_{}_{}_{}_{}_{}_30.h5".format(ancName, desName,train_size,half,seq_length))
+    decoder_model1.save("models/D_insert2_{}_{}_{}_{}_1.h5".format(ancName, desName,ancName, desName))
+    decoder_model2.save("models/D_insert2_{}_{}_{}_{}_2.h5".format(ancName, desName,ancName, desName))
+    decoder_model3.save("models/D_insert2_{}_{}_{}_{}_10.h5".format(ancName, desName,ancName, desName))
     #decoder_model4.save("models/D_insert2_{}_{}_30_double.h5".format(train_size,half))
     #decoder_model5.save("models/D_gap_hg38_{}_{}_50_double.h5".format(train_size,half))
     #decoder_model6.save("models/D_gap_hg38_{}_{}_80_double.h5".format(train_size,half))
     #decoder_model7.save("models/D_gap_hg38_{}_{}_100_double.h5".format(train_size,half))
     #decoder_model8.save("D_gap_hg38_{}_{}_500.h5".format(train_size,half))
     
-    val_loss_hist = []
-    #count = [i for i in range(len(hist3.history['val_loss']))]
-    # val_loss_hist.append([hist4.history['val_loss'].index(min(hist4.history['val_loss'])),min(hist4.history['val_loss'])])
-    # with open('loss_hist_{}_{}_{}_{}_{}.txt'.format(ancName, desName,train_size,half,seq_length), "w") as output:
-    #     output.write(str(val_loss_hist))
-    # with open('loss_hist_{}_{}_{}_{}_{}.txt'.format(ancName, desName,train_size,half,seq_length), 'wb') as fp:
-    #     pickle.dump(val_loss_hist, fp)
-    # print(val_loss_hist)
-    # for i, value in zip(count, hist3.history['val_loss']):
-    #     print(i, value)
+#     count = [i for i in range(len(hist3.history['val_loss']))]
+#     val_loss_hist.append([hist3.history['val_loss'].index(min(hist3.history['val_loss'])),min(hist3.history['val_loss'])])
+#     print(val_loss_hist)
+#     for i, value in zip(count, hist3.history['val_loss']):
+#         print(i, value)
+
+
 
 # grid_search(2, 1, train_size, X_train, y_train, y_train1)
 # grid_search(16, 8, train_size, X_train, y_train, y_train1)        
