@@ -90,7 +90,8 @@ print(label_encoder.inverse_transform(range(encode_dimension)))
 print(onehot_encoder.transform(np.ones(1).reshape(-1,1)))
 key = list(label_encoder.inverse_transform(range(encode_dimension)))
 
-
+dump(label_encoder, 'label_encoder.joblib') 
+dump(onehot_encoder, 'onehot_encoder.joblib')
 # In[ ]:
 
 
