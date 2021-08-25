@@ -80,7 +80,7 @@ six==1.13.0
 statsmodels==0.10.1
 tb-nightly==1.14.0a20190603
 tensorboard==2.0.0
-tensorflow==2.0.0
+tensorflow==2.5.1
 tensorflow-addons==0.6.0
 tensorflow-estimator==2.0.0
 tensorflow-gpu==2.0.0
