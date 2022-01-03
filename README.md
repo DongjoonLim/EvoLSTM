@@ -32,15 +32,15 @@ where the train_size is the length of the training sequence (Due to the memory c
 the seq_length is the length of the sequence context. Recommended to set this to 15 \
 
 so an example would be \
-$ python3 insert2Train_general.py 2 _HP hg38 100000, 15
+$ python3 insert2Train_general.py 2 _HP hg38 100000, 15 \
 
 # Simulating sequence evolution 
 Run the python file with \
 $ python3 simulate.py ancName desName sample_size gpu_index chromosome  \
 where the sample_size is the length of the desired input sequence length \
 gpu_index is the index of the gpu card you want to run the simulation on. Can be found with the command nvidia-smi. If there is only one gpu, set it to 0 \
-chromosome is the desired chromosome the simulation will be run on.
-So an example would be,
+chromosome is the desired chromosome the simulation will be run on. \
+So an example would be, \
 $ python3 simulate.py _HP hg38 100000 0 2 \
 Which will simulate the first 100000 bps of _HP sequence in chromosome 2. \
 The output of the simulation will be saved as 'simulated_{}_{}_{}.npy' \
