@@ -45,9 +45,10 @@ from joblib import dump, load
 import sys
 
 ancName = sys.argv[1]
-sample_size = int(sys.argv[2])
-gpu = sys.argv[3]
-chromosome = sys.argv[4]
+desName = sys.argv[2]
+sample_size = int(sys.argv[3])
+gpu = sys.argv[4]
+chromosome = sys.argv[5]
 
 
 os.environ["CUDA_VISIBLE_DEVICES"]=gpu
@@ -57,7 +58,7 @@ val_loss_hist = []
 # K.clear_session()
 # keras.backend.clear_session()
 
-desName = 'hg38'
+
 
 anc = str(np.load('prepData/insert2Anc_{}_hg38_{}.npy'.format(ancName, chromosome)))[:sample_size]
 des = str(np.load('prepData/insert2Des_{}_hg38_{}.npy'.format(ancName, chromosome)))[:sample_size]
