@@ -16,6 +16,8 @@ import sys
 
 seq_length = 15
 chromosome = sys.argv[1]
+ancestor = sys.argv[2]
+descendant = sys.argv[3]
 def string_to_array(my_string):
     my_string = my_string.lower()
     my_string = re.sub('[^acgt0]', 'z', my_string)
@@ -40,8 +42,10 @@ print(oldlist[1][1])
 print(dir(oldlist[1]))
 print(oldlist[1][0].id)
 
-ancSeq = ['_HPGPNRMPC', '_HPGPNRMPCCS', '_HPGPNRMPCCSO']
-desSeq = ['hg38']
+# ancSeq = ['_HPGPNRMPC', '_HPGPNRMPCCS', '_HPGPNRMPCCSO']
+# desSeq = ['hg38']
+ancSeq = [ancestor]
+desSeq = [descendant]
 
 alphaDict = np.load('mut_dict_insert2.npy',allow_pickle=True).item()
 print(alphaDict)
