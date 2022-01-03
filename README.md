@@ -1,7 +1,7 @@
 # EvoLSTM
 Sequence to Sequence LSTM based evolution simulator
 EvoLSTM requires external Nvidia GPU to train and simulate sequence evolution.
-
+The full text can be found at https://academic.oup.com/bioinformatics/article/36/Supplement_1/i353/5870475
 # Cloning the repository
 $ git clone https://github.com/DongjoonLim/EvoLSTM.git
 
