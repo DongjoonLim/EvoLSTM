@@ -43,7 +43,7 @@ the seq_length is the length of the sequence context. Recommended to set this to
 
 so an example would be 
 
-$ python3 insert2Train_general.py 2 _HP hg38 100000, 15 
+$ python3 insert2Train_general.py 2 _HP hg38 100000 15 
 
 # Simulating sequence evolution 
 Run the python file with 
