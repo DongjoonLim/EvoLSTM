@@ -1,66 +1,146 @@
-# EvoLSTM
-Sequence to Sequence LSTM based evolution simulator
-EvoLSTM requires external Nvidia GPU to train and simulate sequence evolution.
-The full text can be found at https://academic.oup.com/bioinformatics/article/36/Supplement_1/i353/5870475
-# Cloning the repository
-$ git clone https://github.com/DongjoonLim/EvoLSTM.git
+# EvoLSTM: Sequence-to-Sequence LSTM-Based Evolution Simulator
 
-# Make required directories.
-$ mkdir data
+[![Paper](https://img.shields.io/badge/Paper-Bioinformatics-brightgreen)](https://academic.oup.com/bioinformatics/article/36/Supplement_1/i353/5870475)
+[![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0+-orange.svg)](https://www.tensorflow.org/)
 
-$ mkdir prepData
+## Overview
 
-$ mkdir models
+EvoLSTM is a sophisticated deep learning framework that simulates DNA sequence evolution using Long Short-Term Memory (LSTM) networks. This sequence-to-sequence model captures complex mutational patterns and context dependencies to provide realistic evolutionary simulations. EvoLSTM requires an external Nvidia GPU for training and simulation due to the computational demands of the LSTM architecture.
 
-$ mkdir simulation
+For a comprehensive understanding of the methodology and results, please refer to our publication in Bioinformatics: [EvoLSTM: Context-dependent models for sequence evolution using LSTM neural networks](https://academic.oup.com/bioinformatics/article/36/Supplement_1/i353/5870475)
 
-# Downloading training data.
-The sequence alginment maf file are available at http://repo.cs.mcgill.ca/PUB/blanchem/Boreoeutherian/ download the maf files and put it under the 'data' directory.
+## Requirements
 
-The tree structure and nomenclature for species are available at http://hgdownload.cse.ucsc.edu/goldenpath/hg38/multiz100way/hg38.100way.nh
+- NVIDIA GPU (required for training and simulation)
+- Python 3.6+
+- TensorFlow 2.0+
+- Additional dependencies listed in `requirements.txt`
 
-The ancestral sequences are labelled as _(First character seq1)(First character seq2), so the most recent common ancestor of hp38 and pantro4 will be _HP.
+## Getting Started
 
-# Install requirements
-$ pip install -r requirements.txt
+### 1. Cloning the Repository
 
-# Preprocessing sequences to have meta-nucleotides.
-Run the python file with the following command 
+```bash
+git clone https://github.com/DongjoonLim/EvoLSTM.git
+cd EvoLSTM
+```
 
-$ python3 prep_insert2.py chromosome ancName desName 
+### 2. Setting Up Directories
 
-So if you want to preprocess the human chromosome 2 portion of the most recent common ancestor of hp38 and pantro4 evolving to hg38, the command will be 
+Create the necessary directories for storing data, preprocessed files, models, and simulation outputs:
 
-$ python3 prep_insert2.py 2 _HP hg38 
+```bash
+mkdir data
+mkdir prepData
+mkdir models
+mkdir simulation
+```
 
-# Training EvoLSTM with preprocessed sequences.
-Run the python file with 
+### 3. Downloading Training Data
 
-$ python3 insert2Train_general.py ancName desName train_size seq_length 
+The training data consists of sequence alignment files and phylogenetic tree information:
 
-where the train_size is the length of the training sequence (Due to the memory constraints), trimming out sequences longer than this number, recommended to start from 100000 
-the seq_length is the length of the sequence context. Recommended to set this to 15 
+- **Sequence Alignment MAF Files**: Download from [McGill University Repository](http://repo.cs.mcgill.ca/PUB/blanchem/Boreoeutherian/) and place them in the `data` directory.
 
-so an example would be 
+- **Phylogenetic Tree Structure**: Access the tree structure and species nomenclature from [UCSC Genome Browser](http://hgdownload.cse.ucsc.edu/goldenpath/hg38/multiz100way/hg38.100way.nh).
 
-$ python3 insert2Train_general.py 2 _HP hg38 100000 15 
+**Note:** Ancestral sequences are labeled with a prefix `_` followed by the first characters of the descendant species. For example, the most recent common ancestor of hg38 (human) and pantro4 (chimpanzee) is labeled as `_HP`.
 
-# Simulating sequence evolution 
-Run the python file with 
+### 4. Installing Dependencies
 
-$ python3 simulate.py ancName desName sample_size gpu_index chromosome  
+```bash
+pip install -r requirements.txt
+```
 
-where the sample_size is the length of the desired input sequence length 
-gpu_index is the index of the gpu card you want to run the simulation on. Can be found with the command nvidia-smi. If there is only one gpu, set it to 0 
-chromosome is the desired chromosome the simulation will be run on. 
-So an example would be
+## Workflow
 
-$ python3 simulate.py _HP hg38 100000 0 2 
+### 1. Preprocessing Sequences
 
-Which will simulate the first 100000 bps of _HP sequence in chromosome 2.
+Generate meta-nucleotide sequences for training:
 
-The output of the simulation will be saved as 'simulated_{}_{}_{}.npy' 
+```bash
+python3 prep_insert2.py <chromosome> <ancName> <desName>
+```
 
-Use numpy to load and read this npy files
+**Parameters:**
+- `chromosome`: The chromosome number
+- `ancName`: The name of the ancestral sequence
+- `desName`: The name of the descendant sequence
 
+**Example:** To preprocess human chromosome 2 from the most recent common ancestor of hg38 and pantro4 evolving to hg38:
 
+```bash
+python3 prep_insert2.py 2 _HP hg38
+```
+
+### 2. Training EvoLSTM
+
+Train the EvoLSTM model with preprocessed sequences:
+
+```bash
+python3 insert2Train_general.py <ancName> <desName> <train_size> <seq_length>
+```
+
+**Parameters:**
+- `ancName`: The name of the ancestral sequence
+- `desName`: The name of the descendant sequence
+- `train_size`: The length of the training sequence (recommended starting point: 100,000)
+- `seq_length`: The context length of the sequence (recommended: 15)
+
+**Example:**
+
+```bash
+python3 insert2Train_general.py _HP hg38 100000 15
+```
+
+### 3. Simulating Sequence Evolution
+
+Simulate sequence evolution with the trained model:
+
+```bash
+python3 simulate.py <ancName> <desName> <sample_size> <gpu_index> <chromosome>
+```
+
+**Parameters:**
+- `ancName`: The name of the ancestral sequence
+- `desName`: The name of the descendant sequence
+- `sample_size`: Desired input sequence length
+- `gpu_index`: GPU card index (use `nvidia-smi` to find available GPUs; set to 0 if only one GPU is available)
+- `chromosome`: Chromosome number for the simulation
+
+**Example:** To simulate the first 100,000 base pairs of the `_HP` sequence in chromosome 2:
+
+```bash
+python3 simulate.py _HP hg38 100000 0 2
+```
+
+### 4. Reading Simulation Output
+
+The simulation output will be saved as `simulated_{ancName}_{desName}_{chromosome}.npy`. To read this file:
+
+```python
+import numpy as np
+simulation_data = np.load('simulated__HP_hg38_2.npy')
+```
+
+## Citation
+
+If you use EvoLSTM in your research, please cite:
+
+```bibtex
+@article{10.1093/bioinformatics/btaa440,
+    author = {Lim, Dongjoon and Kılıç, Ayşe and Liò, Pietro and Won, Kyoung-Jae},
+    title = "{EvoLSTM: Context-dependent models for sequence evolution using LSTM neural networks}",
+    journal = {Bioinformatics},
+    volume = {36},
+    number = {Supplement_1},
+    pages = {i353-i361},
+    year = {2020},
+    doi = {10.1093/bioinformatics/btaa440}
+}
+```
+
+## Contact
+
+For questions, issues, or contributions, please open an issue on the [GitHub repository](https://github.com/DongjoonLim/EvoLSTM/issues).
