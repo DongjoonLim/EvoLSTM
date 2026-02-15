@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""Simulate sequence evolution using a trained EvoLSTM model."""
 
-# In[1]:
 
 
 from tensorflow.keras.models import load_model
@@ -27,7 +27,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 from sklearn.preprocessing import LabelEncoder
-from bio import AlignIO
+from Bio import AlignIO
 # from Bio.Align import MultipleSeqAlignment
 # from Bio.SeqRecord import SeqRecord
 # from Bio import SeqIO
@@ -93,7 +93,6 @@ key = list(label_encoder.inverse_transform(range(encode_dimension)))
 nucleotide = label_encoder.inverse_transform(range(encode_dimension))
 
 
-# In[2]:
 
 
 # def splice(input, pad):
@@ -116,7 +115,6 @@ nucleotide = label_encoder.inverse_transform(range(encode_dimension))
 # sliced_anc = splice(encoded_anc, False)
 
 
-# In[3]:
 
 
 def decode_sequence(input_seq, model, encoder_model, decoder_model):
@@ -175,7 +173,6 @@ decoded_seq = decode_sequence(encoded_anc, model, encoder_model, decoder_model)
 print(decoded_seq)
 
 
-# In[4]:
 
 
 np.save('simulated_{}_{}_{}.npy'.format(ancName, sample_size, chromosome), decoded_seq)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+"""Train the EvoLSTM model on aligned genomic sequence data."""
 import math
 import itertools
 import operator
@@ -25,7 +27,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 from sklearn.preprocessing import LabelEncoder
-from bio import AlignIO
+from Bio import AlignIO
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
@@ -43,7 +45,6 @@ import sys
 import os
 
 
-# In[3]:
 
 
 ancName = sys.argv[1]
@@ -63,7 +64,6 @@ anc = str(np.load('prepData/insert2Anc_{}_{}.npy'.format(ancName, desName)))
 des = str(np.load('prepData/insert2Des_{}_{}.npy'.format(ancName, desName)))
 
 
-# In[ ]:
 anc = np.array(list(anc+'0'))
 des = np.array(list(des+'0'))
 label_encoder = LabelEncoder()
@@ -92,7 +92,6 @@ key = list(label_encoder.inverse_transform(range(encode_dimension)))
 
 dump(label_encoder, 'label_encoder.joblib') 
 dump(onehot_encoder, 'onehot_encoder.joblib')
-# In[ ]:
 
 
 # def splice(input, pad):
@@ -147,7 +146,6 @@ for i in range (100):
     print(decoder(X[i]), decoder(y1[i]), decoder(y[i]))
 
 
-# In[ ]:
 def concat(input1, input2):
     result = []
     for x, y in tqdm(zip(input1, input2)):
@@ -178,7 +176,6 @@ def decoder(input):
     return decoded
 
 
-# In[ ]:
 
 
 onehot_encoder.transform(np.ones(1).reshape(-1,1))
@@ -187,7 +184,6 @@ for i in range (100):
 print(y_train1[1])
 
 
-# In[ ]:
 
 
 def printHitMiss(a,b):
@@ -217,10 +213,8 @@ def isMutation(a, b):
         print("mutation")
 
 
-# In[ ]:
 
 
-# In[ ]:
 
 def lstm_model(latent_dim, half):
     batch_size = 1000  # Batch size for training.
@@ -343,7 +337,6 @@ def grid_search(latent, half,train_size, X_train, y_train, y_train1):
 #     pickle.dump(val_loss_hist, fp)
 
 
-# In[ ]:
 
 
 # get_ipython().run_line_magic('precision', '2')
@@ -572,7 +565,6 @@ def grid_predict(train_size, half, epoch, X_test, y_test):
 
 
 
-# In[3]:
 def concat(input1, input2):
     result = []
     for x, y in zip(input1, input2):

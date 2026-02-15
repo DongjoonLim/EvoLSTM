@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+"""Simulate insertions in evolved sequences using the EvoLSTM model."""
 from tensorflow.keras.models import load_model
 from scipy import stats
 import tensorflow as tf
@@ -90,7 +92,6 @@ nucleotide = label_encoder.inverse_transform(range(encode_dimension))
 # nucleotide =  ['!', '"', '$', '%', '&', '(', ')', '*', '+', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'l', 'm', 'n', 'o', 'p', 'q', 's', 't', 'u', 'w', 'x', 'z', '{', '|', '}', '~']
 
 
-# In[2]:
 
 
 # def splice(input, pad):
@@ -113,7 +114,6 @@ nucleotide = label_encoder.inverse_transform(range(encode_dimension))
 # sliced_anc = splice(encoded_anc, False)
 
 
-# In[3]:
 
 
 # def decode_sequence(input_seq, model, encoder_model, decoder_model):
@@ -227,7 +227,6 @@ print()
 print(decoded_seq)
 
 
-# In[4]:
 
 
 np.save('simulated_{}_{}_{}.npy'.format(ancName, sample_size, chromosome), decoded_seq)

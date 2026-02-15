@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+"""Prepare and preprocess MAF alignment data for EvoLSTM training."""
 from sklearn.preprocessing import LabelEncoder
-from bio import AlignIO
+from Bio import AlignIO
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from keras_preprocessing import sequence
